@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html> 
+<head> 
+    <title>DI Warband Calc</title> 
+</head> 
+<body>
+    <h1>DI Warband Best Bonus Attributes Calculator</h1>
+    <form method = "POST" enctype="multipart/form-data" action = "/">   
+        <input type="file" name="file" accept=".csv">
+        <input type = "submit" value="Upload and calculate"> 
+    </form>
+    <p style="color:green;"> File uploaded successfully!! </p>
+    {{ data_var|safe }}
+</body> 
+</html>
