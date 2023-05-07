@@ -4,9 +4,9 @@
 
 This example shows how to use Flask 2 on Vercel with Serverless Functions using the [Python Runtime](https://vercel.com/docs/concepts/functions/serverless-functions/runtimes/python).
 
-## Demo
+## Web App at:
 
-https://flask-python-template.vercel.app/
+https://flask-warband-calc.vercel.app/
 
 ## How it Works
 
