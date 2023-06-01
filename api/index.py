@@ -18,7 +18,7 @@ global all_weapon_set
 # Configure upload file path flask
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
  
-app.secret_key = 'This is your secret key. Obviosuly not the real one'
+app.secret_key = 'THIS IS A SECRET KEY'
  
  
 @app.route('/', methods=['GET', 'POST'])
@@ -36,7 +36,7 @@ def uploadFile():
         session['uploaded_data_file_path'] = os.path.join(app.config['UPLOAD_FOLDER'],
                      data_filename)
         
-        #########################
+        ########## Code Starts ###############
         
         global html_data
         html_data = ""
@@ -58,57 +58,39 @@ def uploadFile():
             player_data={}
             index = {}
             
+            #Get the stats name directly from file header, file header starts with player ID(s[0]) and stats name(s[1:])
+            stats_name = dict_reader.fieldnames[1:]
+
+            #First value in stats should be the identifier for name or player, we use it to group by, so this is the real header
+            p_header = dict_reader.fieldnames[0]
+
             for row in dict_reader:
                 value_lst = []
                 sub_d={}
                 
-                try:
-                    value_lst.append(int(row['str']))
-                except:
-                    html_data += "Your file contains missing data. Please write 0 for missing STR attributes."
-                    return render_template('index2.html',data_var=html_data)
-                
-                try:
-                    value_lst.append(int(row['int']))
-                except:
-                    html_data += "Your file contains missing data. Please write 0 for missing INT attributes."
-                    return render_template('index2.html',data_var=html_data)
-                
-                try:
-                    value_lst.append(int(row['will']))
-                except:
-                    html_data += "Your file contains missing data. Please write 0 for missing WILL attributes."
-                    return render_template('index2.html',data_var=html_data)
-                
-                try:
-                    value_lst.append(int(row['fort']))
-                except:
-                    html_data += "Your file contains missing data. Please write 0 for missing FORT attributes."
-                    return render_template('index2.html',data_var=html_data)
-                                
-                try:
-                    value_lst.append(int(row['vit']))
-                except:
-                    html_data += "Your file contains missing data. Please write 0 for missing VIT attributes."
-                    return render_template('index2.html',data_var=html_data)
-                
+                for stat in stats_name:
+                    try:
+                        value_lst.append(int(row[stat]))
+                    except:
+                        html_data += "Your file contains missing data. Please write 0 for missing "+ str(stat) + " attributes."
+                        return render_template('index2.html',data_var=html_data)
                 
                 # no key names - automatically generates       
-                if row['player'] not in header:
-                    index[row['player']]=1
-                    key = 'w'+str(index[row['player']])+str(row['player'])
-                    index[row['player']]+=1
+                if row[p_header] not in header:
+                    index[row[p_header]]=1
+                    key = 'w'+str(index[row[p_header]])+str(row[p_header])
+                    index[row[p_header]]+=1
                     
                     sub_d[key]=tuple(value_lst)
-                    player_data[row['player']]=sub_d
+                    player_data[row[p_header]]=sub_d
                     
-                    header.append(row['player'])
+                    header.append(row[p_header])
                 else:
-                    key = 'w'+str(index[row['player']])+str(row['player'])
-                    index[row['player']]+=1
+                    key = 'w'+str(index[row[p_header]])+str(row[p_header])
+                    index[row[p_header]]+=1
                     
                     sub_d[key]=tuple(value_lst)
-                    player_data[row['player']].update(sub_d)
+                    player_data[row[p_header]].update(sub_d)
                     
         file.close()
         try:
@@ -231,10 +213,15 @@ def uploadFile():
             html_data += create_html_text("NONE. You have an optimal inventory of Ancestral Weapons.",'<br>')
 
         # generate the sets in all_weapon_set
-        for i in range(0,8):
-            for j in range(i+1,8):
-                for l in range(j+1,8):
-                    for m in range(l+1,8):
+        max_range = len(cleaned_player_data.keys())
+        if max_range < 4:
+            html_data += '''<p style="color:red;">This App can only generate sets if there are 4 or more players. Please add more players data!<p>'''
+            return render_template('index2.html',data_var=html_data)
+
+        for i in range(0,max_range):
+            for j in range(i+1,max_range):
+                for l in range(j+1,max_range):
+                    for m in range(l+1,max_range):
                         new_dict={}
                         new_players=[players[i],players[j],players[l],players[m]]
                         new_dict[players[i]] = cleaned_player_data[players[i]]
@@ -247,16 +234,23 @@ def uploadFile():
         #this is sorting by the minimum of the total columns and in reverse,there are still duplicates
         all_weapon_set.sort(key = lambda x: min(x[4][1]), reverse=True)
 
+        def display_lst(lst):
+            global html_data
+            for elem in lst:
+                html_data += str(elem).upper() + ' '
+            html_data += '<br>'
 
         #display one set with the final values
         def display_best(our_set):
             global html_data
+            #last in our_set is total stats
             for items in our_set[:-1]:
                 #print (items[0],items[1])                    
                 html_data += create_html_text(str(items[0])+' '+str(items[1]),'<br>')
+            
             #list_attributes divided by 4 (integer result) represents the value of maximum bonus in game
-            #print("\nFinal values in tableau:\n STR  INT  WILL FORT VIT")
-            html_data += create_html_text("<br>Final values in tableau:<br> STR  INT  WILL FORT VIT",'<br>')
+            html_data += create_html_text("<br>Final values in tableau:",'<br>')
+            display_lst(stats_name)
             #print(tuple(x//4 for x in our_set[-1][1]))
             html_data += create_html_text(str(tuple(x//4 for x in our_set[-1][1])),'<br>')
 
@@ -267,8 +261,8 @@ def uploadFile():
         for i in range(0,10):
             #print('\n----------#'+str(i+1)+'#----------')
             html_data += create_html_text('<br>----------#'+str(i+1)+'#----------','<br>')
+            display_lst(stats_name)
             display_best(all_weapon_set[i])
-
         
         return render_template('index2.html',data_var=html_data)
     return render_template("index.html")
