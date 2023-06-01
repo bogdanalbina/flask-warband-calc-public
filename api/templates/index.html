@@ -2,7 +2,12 @@
 <html> 
 <head> 
     <title>DI Warband Calc</title> 
-</head> 
+</head>
+<style>
+    table, th, td {
+        border: 1px solid black;
+        }
+</style>
 <body>
     <h1>DI Warband Best Bonus Attributes Calculator</h1>
     <form method = "POST" enctype="multipart/form-data" action = "/">   
@@ -10,5 +15,33 @@
         <input type = "submit" value="Upload and calculate"> 
     </form>
     <p style="color:blue;">Choose csv file to upload</p>
+
+    <p>File should look like this (order of stats not important):</p>
+    <table>
+        <tr>
+            <th>Player/Name/ID etc</th>
+            <th>STR</th>
+            <th>INT</th>
+            <th>WILL</th>
+            <th>FORT</th>
+            <th>VIT</th>
+        </tr>
+        <tr>
+            <td>player_name</td>
+            <td>stat_value (0 if not exists)</td>
+            <td>stat_value (0 if not exists)</td>
+            <td>stat_value (0 if not exists)</td>
+            <td>stat_value (0 if not exists)</td>
+            <td>stat_value (0 if not exists)</td>
+        </tr>
+        <tr>
+            <td>player_name</td>
+            <td>stat_value (0 if not exists)</td>
+            <td>stat_value (0 if not exists)</td>
+            <td>stat_value (0 if not exists)</td>
+            <td>stat_value (0 if not exists)</td>
+            <td>stat_value (0 if not exists)</td>
+        </tr>
+    </table>
 </body> 
 </html>
